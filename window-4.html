@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#33281E">
+  <title>Missed Connections — Story 4</title>
+  <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body class="window-four-page">
+  <div class="story-landing" aria-hidden="true">
+    <img src="imgs/landing-04.png" alt="">
+  </div>
+  <header class="home-header story-header">
+    <a class="wordmark" href="homepage.html?skipIntro=1" aria-label="Back to Missed Connections home">
+      <img src="imgs/icon.png" alt="Missed Connections">
+    </a>
+  </header>
+
+  <main id="image-gallery" class="window-four-gallery" aria-label="Vertical image accordion"></main>
+
+  <aside id="active-dialogue" class="window-four-dialogue" aria-live="polite" hidden>
+    <span class="script-speaker"></span>
+    <span class="script-dialogue"></span>
+  </aside>
+
+  <audio id="train-background" autoplay loop preload="auto">
+    <source src="media/train-loop4.mov">
+  </audio>
+
+  <script>
+    const imageNames = [
+      "IMG_0802 copy.JPG", "IMG_0803 copy.JPG", "IMG_0804 copy.JPG", "IMG_0805 copy.JPG",
+      "IMG_0806 copy.JPG", "IMG_0807 copy.JPG", "IMG_0808 copy.JPG", "IMG_0809 copy.JPG",
+      "IMG_0810 copy.JPG", "IMG_0811 copy.JPG", "IMG_0812 copy.JPG", "IMG_0813 copy.JPG",
+      "IMG_0814 copy.JPG", "IMG_0815 copy.JPG", "IMG_0816 copy.JPG", "IMG_0817 copy.JPG",
+      "IMG_0818 copy.JPG", "IMG_0819 copy.JPG", "IMG_0820 copy.JPG", "IMG_0821 copy.JPG",
+      "IMG_0822 copy.JPG", "IMG_0823 copy.JPG", "IMG_0824 copy.JPG", "IMG_0825 copy.JPG",
+      "IMG_0826 copy.JPG", "IMG_0827 copy.JPG", "IMG_0828 copy.JPG", "IMG_0829 copy.JPG",
+      "IMG_0830 copy.JPG", "IMG_0831 copy.JPG", "IMG_0832 copy.JPG", "IMG_0833 copy.JPG"
+    ];
+
+    const scriptLines = [
+      { speaker: "WOMAN ONE (O.S.)", text: "She leaves next Thursday." },
+      { speaker: "WOMAN TWO (O.S.)", text: "Already?" },
+      { speaker: "WOMAN ONE (O.S.)", text: "I know. It feels like I blinked and suddenly I’m buying extra-long twin sheets." },
+      { speaker: "WOMAN TWO (O.S.)", text: "The sheets are what got me." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Really?" },
+      { speaker: "WOMAN TWO (O.S.)", text: "I was fine with the dorm room, the meal plan, all of it. Then I saw those plastic mattress covers and I had to leave the store." },
+      { speaker: "WOMAN ONE (O.S.)", text: "That makes sense." },
+      { speaker: "WOMAN TWO (O.S.)", text: "No, it doesn’t. It’s a mattress cover." },
+      { speaker: "WOMAN ONE (O.S.)", text: "It’s never the mattress cover." },
+      { speaker: "WOMAN TWO (O.S.)", text: "Exactly." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Mine keeps saying she’s excited." },
+      { speaker: "WOMAN TWO (O.S.)", text: "That’s good." },
+      { speaker: "WOMAN ONE (O.S.)", text: "It is good. I want her to be excited. But then she goes, ‘Mom, it’s only two hours away,’ like two hours is across the street." },
+      { speaker: "WOMAN TWO (O.S.)", text: "Mine is flying." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Oh." },
+      { speaker: "WOMAN TWO (O.S.)", text: "I told everyone I was thrilled for her. Then I came home and started reorganizing the pantry." },
+      { speaker: "WOMAN ONE (O.S.)", text: "The pantry?" },
+      { speaker: "WOMAN TWO (O.S.)", text: "Every shelf. I had spices from 2017." },
+      { speaker: "WOMAN ONE (O.S.)", text: "That’s how you know it’s bad." },
+      { speaker: "WOMAN TWO (O.S.)", text: "I alphabetized them." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Oh, it’s very bad." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Is your daughter still trying out for the dance team?" },
+      { speaker: "WOMAN TWO (O.S.)", text: "Yes. She has been practicing every day in our living room." },
+      { speaker: "WOMAN ONE (O.S.)", text: "The one with the turns?" },
+      { speaker: "WOMAN TWO (O.S.)", text: "The turns. The kicks. The music at full volume. I’m going to miss complaining about it." },
+      { speaker: "WOMAN ONE (O.S.)", text: "She’s good." },
+      { speaker: "WOMAN TWO (O.S.)", text: "She is good. But there are so many girls auditioning. And you know how those teams are." },
+      { speaker: "WOMAN ONE (O.S.)", text: "I know." },
+      { speaker: "WOMAN TWO (O.S.)", text: "They post a list. A list. Like it’s an execution." },
+      { speaker: "WOMAN ONE (O.S.)", text: "I hate lists." },
+      { speaker: "WOMAN TWO (O.S.)", text: "I told her not to put everything into it." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Did she listen?" }
+    ];
+
+    const gallery = document.querySelector("#image-gallery");
+    const dialogue = document.querySelector("#active-dialogue");
+    const speakerLabel = dialogue.querySelector(".script-speaker");
+    const dialogueText = dialogue.querySelector(".script-dialogue");
+    const cards = [];
+    let activeIndex = -1;
+
+    function imageUrl(filename) {
+      return `imgs/window-4/${filename.split("/").map(encodeURIComponent).join("/")}`;
+    }
+
+    function positionDialogue() {
+      if (activeIndex < 0) return;
+      const activeBounds = cards[activeIndex].getBoundingClientRect();
+      dialogue.style.top = `${activeBounds.top + activeBounds.height / 2}px`;
+    }
+
+    function activateImage(index) {
+      activeIndex = Math.max(0, Math.min(imageNames.length - 1, index));
+      gallery.classList.add("has-active");
+      cards.forEach((card, cardIndex) => {
+        card.classList.toggle("is-active", cardIndex === activeIndex);
+      });
+
+      const line = scriptLines[activeIndex];
+      speakerLabel.textContent = line.speaker;
+      dialogueText.textContent = line.text;
+      dialogue.classList.toggle("is-left", line.speaker.startsWith("WOMAN ONE"));
+      dialogue.classList.toggle("is-right", line.speaker.startsWith("WOMAN TWO"));
+      dialogue.hidden = false;
+      positionDialogue();
+    }
+
+    imageNames.forEach((filename, index) => {
+      const card = document.createElement("button");
+      card.className = "window-four-panel";
+      card.type = "button";
+      card.setAttribute("aria-label", `Image ${index + 1}. ${scriptLines[index].speaker}: ${scriptLines[index].text}`);
+
+      const image = document.createElement("img");
+      image.src = imageUrl(filename);
+      image.alt = "";
+      image.loading = "eager";
+      card.append(image);
+      card.addEventListener("pointerenter", () => activateImage(index));
+      card.addEventListener("focus", () => activateImage(index));
+      gallery.append(card);
+      cards.push(card);
+    });
+
+    let scrollUpdateFrame = 0;
+    let landingComplete = false;
+    function updateActiveImageFromScroll() {
+      if (!landingComplete) return;
+      scrollUpdateFrame = 0;
+      const viewportCenter = window.innerHeight / 2;
+      let nearestIndex = 0;
+      let nearestDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const bounds = card.getBoundingClientRect();
+        const distance = Math.abs(bounds.top + bounds.height / 2 - viewportCenter);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+
+      if (nearestIndex !== activeIndex) activateImage(nearestIndex);
+      else positionDialogue();
+    }
+
+    function queueScrollUpdate() {
+      if (!scrollUpdateFrame) {
+        scrollUpdateFrame = window.requestAnimationFrame(updateActiveImageFromScroll);
+      }
+    }
+
+    window.addEventListener("scroll", queueScrollUpdate, { passive: true });
+    window.addEventListener("resize", queueScrollUpdate);
+    window.addEventListener("storylandingcomplete", () => {
+      landingComplete = true;
+      updateActiveImageFromScroll();
+    }, { once: true });
+
+    const trainBackground = document.querySelector("#train-background");
+    trainBackground.volume = 0.65;
+
+    function startTrainBackground() {
+      trainBackground.play().then(() => {
+        document.removeEventListener("pointerdown", startTrainBackground);
+        document.removeEventListener("keydown", startTrainBackground);
+      }).catch(() => {
+        document.addEventListener("pointerdown", startTrainBackground, { once: true });
+        document.addEventListener("keydown", startTrainBackground, { once: true });
+      });
+    }
+
+    startTrainBackground();
+  </script>
+  <script>
+    const landingCard = document.querySelector(".story-landing");
+    document.body.classList.add("landing-active");
+    requestAnimationFrame(() => landingCard.classList.add("is-visible"));
+    window.setTimeout(() => landingCard.classList.remove("is-visible"), 3900);
+    window.setTimeout(() => {
+      landingCard.remove();
+      document.body.classList.remove("landing-active");
+      window.dispatchEvent(new Event("storylandingcomplete"));
+    }, 5000);
+  </script>
+</body>
+</html>

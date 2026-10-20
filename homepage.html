@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050505">
+  <title>Missed Connections</title>
+  <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body>
+  <main class="scene" aria-label="Missed Connections intro">
+    <video id="intro" muted playsinline aria-hidden="true">
+      <source src="media/introduction.mp4" type="video/mp4">
+    </video>
+
+    <img
+      id="landing-image"
+      src="imgs/titlecard.png"
+      alt="Missed Connections"
+    >
+  </main>
+
+  <section id="home" class="home" aria-label="Missed Connections home" aria-hidden="true">
+    <header class="home-header">
+      <a class="wordmark" href="homepage.html?skipIntro=1" aria-label="Missed Connections home">
+        <img src="imgs/icon.png" alt="Missed Connections">
+      </a>
+    </header>
+
+    <h2>
+      A digital collection of stories from the New York City subway
+    </h2>
+
+    <section class="gallery-section" aria-label="Image gallery">
+      <div class="gallery-window">
+        <div class="gallery-track">
+          <div class="gallery-set">
+            <figure><a class="gallery-link" href="window-1.html" aria-label="Open story one"><img src="imgs/window-1.png" data-hover-src="imgs/window-1-hover.png" alt="A view through a train window, story one"></a></figure>
+            <figure><a class="gallery-link" href="window-2.html" aria-label="Open story two"><img src="imgs/window-2.png" data-hover-src="imgs/window-2-hover.png" alt="A view through a train window, story two"></a></figure>
+            <figure><a class="gallery-link" href="window-3.html" aria-label="Open story three"><img src="imgs/window-3.png" data-hover-src="imgs/window-3-hover.png" alt="A view through a train window, story three"></a></figure>
+            <figure><a class="gallery-link" href="window-4.html" aria-label="Open story four"><img src="imgs/window-4.png" data-hover-src="imgs/window-4-hover.png" alt="A view through a train window, story four"></a></figure>
+            <figure><a class="gallery-link" href="window-5.html" aria-label="Open story five"><img src="imgs/window-5.png" data-hover-src="imgs/window-5-hover.png" alt="A view through a train window, story five"></a></figure>
+          </div>
+          <div class="gallery-set" aria-hidden="true">
+            <figure><a class="gallery-link" href="window-1.html" tabindex="-1"><img src="imgs/window-1.png" data-hover-src="imgs/window-1-hover.png" alt=""></a></figure>
+            <figure><a class="gallery-link" href="window-2.html" tabindex="-1"><img src="imgs/window-2.png" data-hover-src="imgs/window-2-hover.png" alt=""></a></figure>
+            <figure><a class="gallery-link" href="window-3.html" tabindex="-1"><img src="imgs/window-3.png" data-hover-src="imgs/window-3-hover.png" alt=""></a></figure>
+            <figure><a class="gallery-link" href="window-4.html" tabindex="-1"><img src="imgs/window-4.png" data-hover-src="imgs/window-4-hover.png" alt=""></a></figure>
+            <figure><a class="gallery-link" href="window-5.html" tabindex="-1"><img src="imgs/window-5.png" data-hover-src="imgs/window-5-hover.png" alt=""></a></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+    <audio id="announcer" autoplay preload="auto" playsinline>
+        <source src="media/announcer.mov" type="audio/mpeg">
+    </audio>x
+
+  <script>
+    const video = document.querySelector("#intro");
+    const image = document.querySelector("#landing-image");
+    const home = document.querySelector("#home");
+    const galleryWindow = document.querySelector(".gallery-window");
+    const announcer = document.querySelector("#announcer");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const skipIntro = new URLSearchParams(window.location.search).has("skipIntro");
+    const galleryFigures = [...galleryWindow.querySelectorAll("figure")];
+    const baseGallerySpeed = 80;
+    let gallerySpeed = baseGallerySpeed;
+    let previousGalleryFrame = null;
+
+    galleryFigures.forEach((figure) => {
+      const img = figure.querySelector("img");
+      img.dataset.originalSrc = img.getAttribute("src");
+      const hoverImage = new Image();
+      hoverImage.onload = () => {
+        img.dataset.hoverReady = "true";
+        updateCenteredGalleryImage();
+      };
+      hoverImage.src = img.dataset.hoverSrc;
+    });
+
+    function wrapGalleryPosition(position, loopWidth) {
+      return ((position % loopWidth) + loopWidth) % loopWidth;
+    }
+
+    function animateGallery(timestamp) {
+      if (previousGalleryFrame === null) previousGalleryFrame = timestamp;
+      const elapsed = Math.min((timestamp - previousGalleryFrame) / 1000, 0.05);
+      previousGalleryFrame = timestamp;
+
+      if (home.classList.contains("visible") && !reducedMotion.matches) {
+        const loopWidth = galleryWindow.scrollWidth / 2;
+        galleryWindow.scrollLeft = wrapGalleryPosition(
+          galleryWindow.scrollLeft + gallerySpeed * elapsed,
+          loopWidth
+        );
+        gallerySpeed += (baseGallerySpeed - gallerySpeed) * Math.min(1, elapsed * 0.8);
+      }
+
+      if (home.classList.contains("visible")) updateCenteredGalleryImage();
+
+      window.requestAnimationFrame(animateGallery);
+    }
+
+    function updateCenteredGalleryImage() {
+      const galleryCenter = galleryWindow.getBoundingClientRect().left + galleryWindow.clientWidth / 2;
+      let centeredFigure = null;
+      let closestDistance = Infinity;
+
+      galleryFigures.forEach((figure) => {
+        const bounds = figure.getBoundingClientRect();
+        const distance = Math.abs(bounds.left + bounds.width / 2 - galleryCenter);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          centeredFigure = figure;
+        }
+      });
+
+      galleryFigures.forEach((figure) => {
+        const isCentered = figure === centeredFigure;
+        figure.classList.toggle("is-centered", isCentered);
+
+        const img = figure.querySelector("img");
+        const targetSrc = isCentered || img.dataset.hoverReady !== "true"
+          ? img.dataset.originalSrc
+          : img.dataset.hoverSrc;
+        if (img.getAttribute("src") !== targetSrc) img.setAttribute("src", targetSrc);
+      });
+    }
+
+    window.requestAnimationFrame(animateGallery);
+
+    function showTitleCard() {
+      image.classList.add("visible");
+    }
+
+    function fadeToBlack() {
+      document.body.classList.add("fade-out-screen");
+      window.setTimeout(() => {
+        showHome();
+      }, 500);
+    }
+
+    function showHome() {
+      home.classList.add("visible");
+      home.setAttribute("aria-hidden", "false");
+      const loopWidth = galleryWindow.scrollWidth / 2;
+      const firstImageWidth = galleryWindow.querySelector("figure").offsetWidth;
+      galleryWindow.scrollLeft = loopWidth - (galleryWindow.clientWidth - firstImageWidth) / 2;
+    }
+
+    let fadeTimer;
+
+    function scheduleFadeToBlack() {
+      window.clearTimeout(fadeTimer);
+      fadeTimer = window.setTimeout(fadeToBlack, 8000);
+    }
+
+    galleryWindow.addEventListener("wheel", (event) => {
+      const horizontalDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
+      if (horizontalDelta === 0) return;
+
+      event.preventDefault();
+      const deltaScale = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+          ? galleryWindow.clientWidth
+          : 1;
+      gallerySpeed = Math.max(-5000, Math.min(5000, gallerySpeed + horizontalDelta * deltaScale * 5));
+    }, { passive: false });
+
+    galleryWindow.addEventListener("scroll", () => {
+      const loopWidth = galleryWindow.scrollWidth / 2;
+      const rightEdge = galleryWindow.scrollWidth - galleryWindow.clientWidth;
+
+      if (galleryWindow.scrollLeft <= 0) {
+        galleryWindow.scrollLeft = loopWidth;
+      } else if (galleryWindow.scrollLeft >= rightEdge - 1) {
+        galleryWindow.scrollLeft -= loopWidth;
+      }
+      updateCenteredGalleryImage();
+    }, { passive: true });
+
+    function startAnnouncer() {
+      if (!announcer) return;
+
+      announcer.volume = 1;
+      announcer.muted = false;
+      announcer.currentTime = 0;
+      announcer.play().catch(() => {
+        document.addEventListener("pointerdown", startAnnouncer, { once: true });
+        document.addEventListener("keydown", startAnnouncer, { once: true });
+      });
+    }
+
+    if (!skipIntro) startAnnouncer();
+
+    if (skipIntro) {
+      video.pause();
+      document.body.classList.add("fade-out-screen");
+      showHome();
+    } else if (reducedMotion.matches) {
+      video.pause();
+      document.body.classList.add("fade-out-screen");
+      showHome();
+    } else {
+      video.addEventListener("loadeddata", showTitleCard, { once: true });
+      video.addEventListener("error", showTitleCard, { once: true });
+      video.addEventListener("loadedmetadata", () => {
+        video.play().then(scheduleFadeToBlack).catch(() => showTitleCard());
+      }, { once: true });
+
+      // Keep the title card visible if the video takes too long to load.
+      window.setTimeout(showTitleCard, 2500);
+    }
+
+    reducedMotion.addEventListener("change", (event) => {
+      if (event.matches) {
+        video.pause();
+        window.clearTimeout(fadeTimer);
+        document.body.classList.add("fade-out-screen");
+        showHome();
+      } else {
+        if (home.classList.contains("visible")) return;
+        document.body.classList.remove("fade-out-screen");
+        video.play().then(scheduleFadeToBlack).catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>

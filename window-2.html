@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#33281E">
+  <title>Missed Connections — Story 2</title>
+  <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body class="window-two-page">
+  <div class="story-landing" aria-hidden="true">
+    <img src="imgs/landing-02.png" alt="">
+  </div>
+  <div class="window-two-background" aria-hidden="true"></div>
+
+  <header class="home-header story-header">
+    <a class="wordmark" href="homepage.html?skipIntro=1" aria-label="Back to Missed Connections home">
+      <img src="imgs/icon.png" alt="Missed Connections">
+    </a>
+  </header>
+
+  <main id="script-stage" class="script-stage" aria-label="A scattered conversation on a train" aria-live="polite"></main>
+
+  <audio id="train-background" autoplay loop preload="auto">
+    <source src="media/train-loop3.mov">
+  </audio>
+
+  <script>
+    const scriptStage = document.querySelector("#script-stage");
+    const trainBackground = document.querySelector("#train-background");
+    const scriptLines = [
+      { speaker: "WOMAN ONE (O.S.)", text: "I’m sorry, but I thought it was too long." },
+      { speaker: "WOMAN TWO (O.S.)", text: "Too long?" },
+      { speaker: "WOMAN ONE (O.S.)", text: "Six hundred pages is a commitment. I started it in October." },
+      { speaker: "WOMAN THREE (O.S.)", text: "That is because you kept reading that detective novel in between." },
+      { speaker: "WOMAN ONE (O.S.)", text: "A woman needs relief." },
+      { speaker: "WOMAN TWO (O.S.)", text: "From Steinbeck?" },
+      { speaker: "WOMAN ONE (O.S.)", text: "From California." },
+      { speaker: "WOMAN THREE (O.S.)", text: "It is not about California." },
+      { speaker: "WOMAN ONE (O.S.)", text: "It is very much about California." },
+      { speaker: "WOMAN TWO (O.S.)", text: "It is about families." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Which is worse." },
+      { stageDirection: "The train sways. A man in a suit grabs a pole. A child presses both palms against the window, fascinated by his own reflection." },
+      { speaker: "WOMAN THREE (O.S.)", text: "I loved it. I thought it was beautiful." },
+      { speaker: "WOMAN ONE (O.S.)", text: "You would." },
+      { speaker: "WOMAN THREE (O.S.)", text: "Why is that an insult?" },
+      { speaker: "WOMAN ONE (O.S.)", text: "It isn’t. You just like anything with a tragic family and a lot of weather." },
+      { speaker: "WOMAN THREE (O.S.)", text: "There was not that much weather." },
+      { speaker: "WOMAN TWO (O.S.)", text: "There was enough dust to qualify." },
+      { speaker: "WOMAN THREE (O.S.)", text: "I mean the whole story. It felt ancient. Like he was writing about something larger than those people." },
+      { speaker: "WOMAN TWO (O.S.)", text: "Good and evil." },
+      { speaker: "WOMAN ONE (O.S.)", text: "And terrible parenting." },
+      { speaker: "WOMAN TWO (O.S.)", text: "Also that." },
+      { stageDirection: "The train slows." },
+      { stageDirection: "NEXT STOP: 79TH STREET.", emphasis: true },
+      { stageDirection: "A chime sounds. The doors open, then close again." },
+      { speaker: "WOMAN THREE (O.S.)", text: "I cannot stop thinking about Cathy." },
+      { speaker: "WOMAN ONE (O.S.)", text: "I have been trying to stop thinking about Cathy." },
+      { speaker: "WOMAN TWO (O.S.)", text: "I found her frightening because she was so calm." },
+      { speaker: "WOMAN ONE (O.S.)", text: "She was not calm. She was evil." },
+      { speaker: "WOMAN THREE (O.S.)", text: "But was she a person, or was she meant to be something else?" },
+      { speaker: "WOMAN ONE (O.S.)", text: "I don’t know what that means." },
+      { speaker: "WOMAN THREE (O.S.)", text: "A symbol." },
+      { speaker: "WOMAN ONE (O.S.)", text: "I hate when people say ‘a symbol’ as if that excuses bad behavior." },
+      { speaker: "WOMAN TWO (O.S.)", text: "No one is excusing Cathy." },
+      { speaker: "WOMAN ONE (O.S.)", text: "Good." },
+      { speaker: "WOMAN TWO (O.S.)", text: "But I do understand what she means. Cathy is so exaggerated that she almost becomes a nightmare someone is having about women." },
+      { speaker: "WOMAN THREE (O.S.)", text: "Exactly." },
+      { speaker: "WOMAN ONE (O.S.)", text: "I thought she was a nightmare someone was having about human beings." },
+      { speaker: "WOMAN TWO (O.S.)", text: "That is more generous." },
+      { speaker: "WOMAN ONE (O.S.)", text: "I am becoming more generous in my old age." }
+    ];
+
+    function placeLine(line) {
+      const margin = 28;
+      const minTop = Math.max(90, window.innerHeight * 0.12);
+      function findClearPosition() {
+        const maxLeft = Math.max(margin, window.innerWidth - line.offsetWidth - margin);
+        const maxTop = Math.max(minTop, window.innerHeight - line.offsetHeight - margin);
+        const activeLines = [...scriptStage.querySelectorAll(".script-line")]
+          .filter((existingLine) => existingLine !== line);
+
+        function positionIsClear(left, top) {
+          line.style.left = `${left}px`;
+          line.style.top = `${top}px`;
+          const candidate = line.getBoundingClientRect();
+          if (candidate.right > window.innerWidth - margin || candidate.bottom > window.innerHeight - margin) {
+            return false;
+          }
+
+          return activeLines.every((existingLine) => {
+            const existing = existingLine.getBoundingClientRect();
+            return candidate.right + margin <= existing.left
+              || candidate.left >= existing.right + margin
+              || candidate.bottom + margin <= existing.top
+              || candidate.top >= existing.bottom + margin;
+          });
+        }
+
+        for (let attempt = 0; attempt < 160; attempt += 1) {
+          const left = margin + Math.random() * Math.max(0, maxLeft - margin);
+          const top = minTop + Math.random() * Math.max(0, maxTop - minTop);
+          if (positionIsClear(left, top)) return true;
+        }
+
+        const stepX = Math.max(32, window.innerWidth * 0.08);
+        const stepY = Math.max(32, window.innerHeight * 0.08);
+        for (let top = minTop; top <= maxTop; top += stepY) {
+          for (let left = margin; left <= maxLeft; left += stepX) {
+            if (positionIsClear(left, top)) return true;
+          }
+        }
+
+        return false;
+      }
+
+      while (!findClearPosition()) {
+        const oldestLine = scriptStage.querySelector(".script-line");
+        if (!oldestLine || oldestLine === line) {
+          line.style.left = `${margin}px`;
+          line.style.top = `${minTop}px`;
+          return;
+        }
+        oldestLine.remove();
+      }
+    }
+
+    function showLine(entry) {
+      const line = document.createElement("p");
+      line.className = `script-line${entry.stageDirection ? " stage-direction" : ""}${entry.emphasis ? " stop-announcement" : ""}`;
+
+      if (entry.stageDirection) {
+        line.textContent = entry.stageDirection;
+      } else {
+        const speaker = document.createElement("span");
+        speaker.className = "script-speaker";
+        speaker.textContent = entry.speaker;
+        const dialogue = document.createElement("span");
+        dialogue.className = "script-dialogue";
+        dialogue.textContent = entry.text;
+        line.append(speaker, dialogue);
+      }
+
+      scriptStage.append(line);
+      placeLine(line);
+      line.addEventListener("animationend", () => line.remove(), { once: true });
+    }
+
+    let nextLineIndex = 0;
+    let idleRevealTimer;
+    let landingComplete = false;
+
+    function scheduleIdleReveal() {
+      window.clearTimeout(idleRevealTimer);
+      if (landingComplete && nextLineIndex < scriptLines.length) {
+        idleRevealTimer = window.setTimeout(revealNextLine, 3000);
+      }
+    }
+
+    function revealNextLine() {
+      if (!landingComplete || nextLineIndex >= scriptLines.length) return;
+      showLine(scriptLines[nextLineIndex]);
+      nextLineIndex += 1;
+      scheduleIdleReveal();
+    }
+
+    window.addEventListener("storylandingcomplete", () => {
+      landingComplete = true;
+      revealNextLine();
+    }, { once: true });
+    let wheelGestureActive = false;
+    let wheelGestureTimer;
+    window.addEventListener("wheel", () => {
+      if (!landingComplete) return;
+      if (!wheelGestureActive) {
+        revealNextLine();
+        wheelGestureActive = true;
+      }
+      window.clearTimeout(wheelGestureTimer);
+      wheelGestureTimer = window.setTimeout(() => {
+        wheelGestureActive = false;
+      }, 250);
+    }, { passive: true });
+
+    let touchGestureActive = false;
+    window.addEventListener("touchmove", () => {
+      if (!landingComplete) return;
+      if (touchGestureActive) return;
+      touchGestureActive = true;
+      revealNextLine();
+    }, { passive: true });
+    window.addEventListener("touchend", () => { touchGestureActive = false; }, { passive: true });
+    window.addEventListener("touchcancel", () => { touchGestureActive = false; }, { passive: true });
+
+    trainBackground.volume = 0.65;
+
+    function startTrainBackground() {
+      trainBackground.play().then(() => {
+        document.removeEventListener("pointerdown", startTrainBackground);
+        document.removeEventListener("keydown", startTrainBackground);
+      }).catch(() => {
+        document.addEventListener("pointerdown", startTrainBackground, { once: true });
+        document.addEventListener("keydown", startTrainBackground, { once: true });
+      });
+    }
+
+    startTrainBackground();
+  </script>
+  <script>
+    const landingCard = document.querySelector(".story-landing");
+    document.body.classList.add("landing-active");
+    requestAnimationFrame(() => landingCard.classList.add("is-visible"));
+    window.setTimeout(() => landingCard.classList.remove("is-visible"), 3900);
+    window.setTimeout(() => {
+      landingCard.remove();
+      document.body.classList.remove("landing-active");
+      window.dispatchEvent(new Event("storylandingcomplete"));
+    }, 5000);
+  </script>
+</body>
+</html>

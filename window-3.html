@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050505">
+  <title>Missed Connections — Story 3</title>
+  <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body class="window-three-page">
+  <div class="story-landing" aria-hidden="true">
+    <img src="imgs/landing-03.png" alt="">
+  </div>
+  <header class="home-header story-header">
+    <a class="wordmark" href="homepage.html?skipIntro=1" aria-label="Back to Missed Connections home">
+      <img src="imgs/icon.png" alt="Missed Connections">
+    </a>
+    <h2 class="window-three-title">Contact Sheet</h2>
+  </header>
+
+  <main id="image-grid" class="window-three-grid" aria-label="Thirty images, each revealing a line from the conversation"></main>
+
+  <audio id="train-background" autoplay loop preload="auto">
+    <source src="media/train-loop3.mov">
+  </audio>
+
+  <script>
+    const images = [
+      "classicu 2026-10-19 2359092934C5185282.JPG",
+      "classicu 2026-10-19 2359096DEDC0E70DD7.JPG",
+      "classicu 2026-10-19 2359098ED98663D3DE.JPG",
+      "classicu 2026-10-19 235909D7AA5CDB8590.JPG",
+      "classicu 2026-10-19 235910299CF8FDB328.JPG",
+      "classicu 2026-10-19 2359107780D1CB0044.JPG",
+      "classicu 2026-10-19 235910DAA10ADD327B.JPG",
+      "classicu 2026-10-19 235910EF1E4A7C9EE9.JPG",
+      "classicu 2026-10-19 235910FA62C1BE0CD0.JPG",
+      "classicu 2026-10-19 23593830DB96D33CE9.JPG",
+      "classicu 2026-10-19 23593865111BFFE2D5.JPG",
+      "classicu 2026-10-19 2359396725B87F7145.JPG",
+      "classicu 2026-10-19 2359396EB20BD89946.JPG",
+      "classicu 2026-10-19 235939998D415CA4FA.JPG",
+      "classicu 2026-10-19 235939BD22079AC9D3.JPG",
+      "classicu 2026-10-19 235939EB824BDBDC15.JPG",
+      "classicu 2026-10-19 23594027721EEC7E3C.JPG",
+      "classicu 2026-10-19 235940932622076B9C.JPG",
+      "classicu 2026-10-20 000102543EAE280BD9.JPG",
+      "classicu 2026-10-20 000102562DC3E4EB0D.JPG",
+      "classicu 2026-10-20 0001025C00521B0DA4.JPG",
+      "classicu 2026-10-20 000102C0F900683605.JPG",
+      "classicu 2026-10-20 000102DCFDEAD9E25F.JPG",
+      "classicu 2026-10-20 000103040607B43B7D.JPG",
+      "classicu 2026-10-20 0001035FCEEA1FA34C.JPG",
+      "classicu 2026-10-20 00010380A008A9693E.JPG",
+      "classicu 2026-10-20 000103CC74B93CE1D4.JPG",
+      "classicu 2026-10-20 000126ABA3601E532F.JPG",
+      "classicu 2026-10-20 000126B63EC1B08B33.JPG",
+      "classicu 2026-10-20 000126D098AA49D0EF.JPG"
+    ];
+
+    const scriptLines = [
+      { speaker: "GIRL ONE (O.S.)", text: "I’m serious. You have to eat all twelve under the table before midnight." },
+      { speaker: "GIRL TWO (O.S.)", text: "That sounds like something a cousin tells you when she wants to see you crawl on the floor at a party." },
+      { stageDirection: "GIRL ONE, 22, wears a long black dress and red lipstick. Her hand grips the pole above her head." },
+      { stageDirection: "GIRL TWO, 22, wears a vintage leather jacket and carries a bright silver handbag. She looks unconvinced." },
+      { speaker: "GIRL ONE (O.S.)", text: "No, it’s real. Twelve grapes for the twelve chimes. Every grape is supposed to bring you luck in love for one month." },
+      { speaker: "GIRL TWO (O.S.)", text: "And the table part?" },
+      { speaker: "GIRL ONE (O.S.)", text: "That’s specifically for finding a boyfriend." },
+      { speaker: "GIRL TWO (O.S.)", text: "Oh, thank God. I was worried it was just for general prosperity." },
+      { speaker: "GIRL ONE (O.S.)", text: "You laugh, but my friend did it last year and started dating someone in March." },
+      { speaker: "GIRL TWO (O.S.)", text: "Your friend also went on, like, forty Hinge dates." },
+      { speaker: "GIRL ONE (O.S.)", text: "Maybe the grapes guided her to Hinge." },
+      { speaker: "GIRL TWO (O.S.)", text: "Maybe the grapes could guide a man to text back." },
+      { speaker: "GIRL ONE (O.S.)", text: "That’s beyond even spiritual intervention." },
+      { speaker: "GIRL TWO (O.S.)", text: "I don’t understand why dating in New York is supposed to be glamorous." },
+      { speaker: "GIRL ONE (O.S.)", text: "Because it looks glamorous from outside New York." },
+      { speaker: "GIRL TWO (O.S.)", text: "Exactly. It’s only glamorous in movies. In real life, you spend forty-five minutes on the train to meet someone who says he’s ‘not really looking for labels.’" },
+      { speaker: "GIRL ONE (O.S.)", text: "Then you take another forty-five-minute train home wondering why you put on eyeliner." },
+      { speaker: "GIRL TWO (O.S.)", text: "And your apartment has no heat." },
+      { speaker: "GIRL ONE (O.S.)", text: "And your roommate is having sex." },
+      { speaker: "GIRL TWO (O.S.)", text: "And you have to pretend you’re not sad while you make pasta in the dark." },
+      { speaker: "GIRL ONE (O.S.)", text: "But I still think it can happen here." },
+      { speaker: "GIRL TWO (O.S.)", text: "What can?" },
+      { speaker: "GIRL ONE (O.S.)", text: "Real love." },
+      { speaker: "GIRL TWO (O.S.)", text: "You’re saying that because you had two glasses of natural wine." },
+      { speaker: "GIRL ONE (O.S.)", text: "No. I’m saying it because there are eight million people here." },
+      { speaker: "GIRL TWO (O.S.)", text: "That’s the terrifying part." },
+      { speaker: "GIRL ONE (O.S.)", text: "No, it’s hopeful. There are people who like the same weird things you like. There’s someone who knows the exact feeling of walking home on the first warm night of April. Someone who will get why you stop in front of brownstones just because the light is hitting the windows right." },
+      { speaker: "GIRL TWO (O.S.)", text: "But how do you find that person?" },
+      { speaker: "GIRL ONE (O.S.)", text: "I don’t know. By accident, probably." },
+      { speaker: "GIRL TWO (O.S.)", text: "That’s not a plan." },
+      { speaker: "GIRL ONE (O.S.)", text: "New York doesn’t really let you make plans. You miss one train and suddenly you meet someone at a bar. You say yes to one dinner and someone’s friend walks in late. You get rained on outside a bookstore and a stranger gives you their umbrella." },
+      { speaker: "GIRL TWO (O.S.)", text: "That has literally never happened to me." },
+      { speaker: "GIRL ONE (O.S.)", text: "It could." },
+      { speaker: "GIRL TWO (O.S.)", text: "More likely, a stranger gives me a flyer." },
+      { speaker: "GIRL ONE (O.S.)", text: "Okay, but still. There’s romance in that." },
+      { speaker: "GIRL TWO (O.S.)", text: "In a flyer?" },
+      { speaker: "GIRL ONE (O.S.)", text: "In being seen, maybe." },
+      { speaker: "GIRL TWO (O.S.)", text: "Do you think I should do the grapes?" },
+      { speaker: "GIRL ONE (O.S.)", text: "Yes." },
+      { speaker: "GIRL TWO (O.S.)", text: "Even though I hate grapes?" },
+      { speaker: "GIRL ONE (O.S.)", text: "Especially because you hate grapes. Love requires sacrifice." },
+      { speaker: "GIRL TWO (O.S.)", text: "That’s so dark." },
+      { speaker: "GIRL ONE (O.S.)", text: "It’s twelve grapes, not a blood oath." },
+      { speaker: "GIRL TWO (O.S.)", text: "I don’t know. New York dating kind of feels like a blood oath." },
+      { stageDirection: "The doors open." },
+      { speaker: "GIRL TWO", text: "You’re trying to recruit me into grape-based delusion." },
+      { speaker: "GIRL ONE (O.S.)", text: "I think the city is already delusional enough. It can handle twelve grapes." }
+    ];
+
+    function shuffle(items) {
+      for (let index = items.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+      }
+      return items;
+    }
+
+    function imageUrl(filename) {
+      return `imgs/window-3/${filename.split("/").map(encodeURIComponent).join("/")}`;
+    }
+
+    let lineDeck = shuffle([...scriptLines]);
+    let lastRevealedLine = null;
+    let activeCard = null;
+    const imageGrid = document.querySelector("#image-grid");
+
+    function drawLine(previousLine) {
+      let lineIndex = lineDeck.findIndex((line) => line !== previousLine && line !== lastRevealedLine);
+      if (lineIndex < 0) {
+        lineDeck = shuffle([...scriptLines]);
+        lineIndex = lineDeck.findIndex((line) => line !== previousLine && line !== lastRevealedLine);
+      }
+
+      const [line] = lineDeck.splice(lineIndex, 1);
+      lastRevealedLine = line;
+      return line;
+    }
+
+    function renderLine(back, line) {
+      back.replaceChildren();
+      back.classList.toggle("stage-direction", Boolean(line.stageDirection));
+      if (line.stageDirection) {
+        back.textContent = line.stageDirection;
+        return;
+      }
+
+      const speaker = document.createElement("span");
+      speaker.className = "script-speaker";
+      speaker.textContent = line.speaker;
+      const dialogue = document.createElement("span");
+      dialogue.className = "script-dialogue";
+      dialogue.textContent = line.text;
+      back.append(speaker, dialogue);
+    }
+
+    function centerCard(card) {
+      const bounds = card.getBoundingClientRect();
+      card.style.setProperty("--center-x", `${window.innerWidth / 2 - (bounds.left + bounds.width / 2)}px`);
+      card.style.setProperty("--center-y", `${window.innerHeight / 2 - (bounds.top + bounds.height / 2)}px`);
+    }
+
+    imageGrid.addEventListener("pointerleave", () => {
+      activeCard?.classList.remove("is-active");
+      activeCard = null;
+    });
+
+    images.forEach((filename, index) => {
+      const card = document.createElement("button");
+      card.className = "window-three-card";
+      card.type = "button";
+      card.setAttribute("aria-label", `Image ${index + 1}: focus or hover to reveal a dialogue line`);
+      card._currentLine = null;
+
+      const cardInner = document.createElement("span");
+      cardInner.className = "window-three-card-inner";
+
+      const front = document.createElement("span");
+      front.className = "window-three-card-face window-three-card-front";
+      const image = document.createElement("img");
+      image.src = imageUrl(filename);
+      image.alt = "";
+      image.loading = "eager";
+      front.append(image);
+
+      const back = document.createElement("span");
+      back.className = "window-three-card-face window-three-card-back";
+      back.textContent = "HOVER TO REVEAL A LINE";
+
+      cardInner.append(front, back);
+      card.append(cardInner);
+      imageGrid.append(card);
+
+      function revealAnotherLine() {
+        if (activeCard && activeCard !== card) activeCard.classList.remove("is-active");
+        activeCard = card;
+        centerCard(card);
+        card.classList.add("is-active");
+        card._currentLine = drawLine(card._currentLine);
+        renderLine(back, card._currentLine);
+      }
+
+      card.addEventListener("pointerenter", revealAnotherLine);
+      card.addEventListener("focus", revealAnotherLine);
+    });
+
+    const trainBackground = document.querySelector("#train-background");
+    trainBackground.volume = 0.65;
+
+    function startTrainBackground() {
+      trainBackground.play().then(() => {
+        document.removeEventListener("pointerdown", startTrainBackground);
+        document.removeEventListener("keydown", startTrainBackground);
+      }).catch(() => {
+        document.addEventListener("pointerdown", startTrainBackground, { once: true });
+        document.addEventListener("keydown", startTrainBackground, { once: true });
+      });
+    }
+
+    startTrainBackground();
+  </script>
+  <script>
+    const landingCard = document.querySelector(".story-landing");
+    document.body.classList.add("landing-active");
+    requestAnimationFrame(() => landingCard.classList.add("is-visible"));
+    window.setTimeout(() => landingCard.classList.remove("is-visible"), 3900);
+    window.setTimeout(() => {
+      landingCard.remove();
+      document.body.classList.remove("landing-active");
+      window.dispatchEvent(new Event("storylandingcomplete"));
+    }, 5000);
+  </script>
+</body>
+</html>

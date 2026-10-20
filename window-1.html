@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#050505">
+  <title>Missed Connections — Story 1</title>
+  <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body class="story-page">
+  <div class="story-landing" aria-hidden="true">
+    <img src="imgs/landing-01.png" alt="">
+  </div>
+  <header class="home-header story-header">
+    <a class="wordmark" href="homepage.html?skipIntro=1" aria-label="Back to Missed Connections home">
+      <img src="imgs/icon.png" alt="Missed Connections">
+    </a>
+  </header>
+
+  <div class="story-controls" role="group" aria-label="Video controls">
+    <button id="toggle-play" type="button" aria-label="Pause video">Pause</button>
+    <div class="timeline-strip">
+      <div id="timeline-thumbnails" aria-hidden="true"></div>
+      <input id="video-timeline" type="range" min="0" max="100" value="0" step="0.1" aria-label="Video timeline">
+    </div>
+    <output id="video-time" aria-live="off">0:00 / 0:00</output>
+  </div>
+
+  <main class="story-video-stage">
+    <video id="story-video" muted playsinline loop>
+      <source src="media/Video-1.mov" type="video/mp4">
+    </video>
+  </main>
+
+  <audio id="train-background" autoplay loop preload="auto">
+    <source src="media/train-loop2.mov">
+  </audio>
+
+  <script>
+    const storyVideo = document.querySelector("#story-video");
+    const trainBackground = document.querySelector("#train-background");
+    const timeline = document.querySelector("#video-timeline");
+    const timelineThumbnails = document.querySelector("#timeline-thumbnails");
+    const timeDisplay = document.querySelector("#video-time");
+    const playButton = document.querySelector("#toggle-play");
+    let landingComplete = false;
+    let scrubTarget = null;
+    let resumePlaybackTimer;
+    let resumeAfterScroll = false;
+    let timelineWasPlaying = false;
+
+    trainBackground.volume = 0.65;
+
+    function startTrainBackground() {
+      trainBackground.play().then(() => {
+        document.removeEventListener("pointerdown", startTrainBackground);
+        document.removeEventListener("keydown", startTrainBackground);
+      }).catch(() => {
+        document.addEventListener("pointerdown", startTrainBackground, { once: true });
+        document.addEventListener("keydown", startTrainBackground, { once: true });
+      });
+    }
+
+    startTrainBackground();
+
+    function formatTime(time) {
+      if (!Number.isFinite(time)) return "0:00";
+      const wholeSeconds = Math.floor(time);
+      return `${Math.floor(wholeSeconds / 60)}:${String(wholeSeconds % 60).padStart(2, "0")}`;
+    }
+
+    function updateTimeline() {
+      const duration = storyVideo.duration;
+      if (!Number.isFinite(duration) || duration <= 0) return;
+      timeline.max = duration;
+      timeline.value = storyVideo.currentTime;
+      const progress = (storyVideo.currentTime / duration) * 100;
+      timeline.style.setProperty("--timeline-progress", `${progress}%`);
+      timeDisplay.value = `${formatTime(storyVideo.currentTime)} / ${formatTime(duration)}`;
+      timeDisplay.textContent = timeDisplay.value;
+    }
+
+    function createTimelineThumbnails() {
+      const thumbnailVideo = document.createElement("video");
+      thumbnailVideo.muted = true;
+      thumbnailVideo.preload = "auto";
+
+      thumbnailVideo.addEventListener("loadedmetadata", () => {
+        const frameCount = 20;
+        const frameWidth = 96;
+        const frameHeight = 54;
+        const canvas = document.createElement("canvas");
+        canvas.width = frameCount * frameWidth;
+        canvas.height = frameHeight;
+        const context = canvas.getContext("2d");
+        let frameIndex = 0;
+
+        function captureFrame() {
+          const scale = Math.max(frameWidth / thumbnailVideo.videoWidth, frameHeight / thumbnailVideo.videoHeight);
+          const drawWidth = thumbnailVideo.videoWidth * scale;
+          const drawHeight = thumbnailVideo.videoHeight * scale;
+          const offsetX = frameIndex * frameWidth + (frameWidth - drawWidth) / 2;
+          const offsetY = (frameHeight - drawHeight) / 2;
+          context.drawImage(thumbnailVideo, offsetX, offsetY, drawWidth, drawHeight);
+          frameIndex += 1;
+
+          if (frameIndex === frameCount) {
+            timelineThumbnails.style.backgroundImage = `url("${canvas.toDataURL("image/jpeg", 0.72)}")`;
+            return;
+          }
+
+          thumbnailVideo.currentTime = thumbnailVideo.duration * frameIndex / (frameCount - 1);
+        }
+
+        thumbnailVideo.addEventListener("seeked", captureFrame);
+        thumbnailVideo.addEventListener("loadeddata", captureFrame, { once: true });
+      }, { once: true });
+      thumbnailVideo.src = "media/Video-1.mp4";
+    }
+
+    function cancelScrollResume() {
+      window.clearTimeout(resumePlaybackTimer);
+      scrubTarget = null;
+      resumeAfterScroll = false;
+    }
+
+    function beginTimelineScrub() {
+      if (!timelineWasPlaying) timelineWasPlaying = !storyVideo.paused || resumeAfterScroll;
+      cancelScrollResume();
+      storyVideo.pause();
+    }
+
+    function endTimelineScrub() {
+      if (timelineWasPlaying) storyVideo.play().catch(() => {});
+      timelineWasPlaying = false;
+    }
+
+    timeline.addEventListener("pointerdown", beginTimelineScrub);
+    timeline.addEventListener("keydown", (event) => {
+      if (["ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"].includes(event.key)) {
+        beginTimelineScrub();
+      }
+    });
+    timeline.addEventListener("input", () => {
+      storyVideo.currentTime = Number(timeline.value);
+      updateTimeline();
+    });
+    timeline.addEventListener("change", endTimelineScrub);
+    timeline.addEventListener("pointerup", endTimelineScrub);
+    timeline.addEventListener("pointercancel", endTimelineScrub);
+
+    playButton.addEventListener("click", () => {
+      cancelScrollResume();
+      if (storyVideo.paused) storyVideo.play().catch(() => {});
+      else storyVideo.pause();
+    });
+    storyVideo.addEventListener("play", () => {
+      playButton.textContent = "Pause";
+      playButton.setAttribute("aria-label", "Pause video");
+    });
+    storyVideo.addEventListener("pause", () => {
+      playButton.textContent = "Play";
+      playButton.setAttribute("aria-label", "Play video");
+    });
+    storyVideo.addEventListener("loadedmetadata", updateTimeline);
+    storyVideo.addEventListener("loadedmetadata", createTimelineThumbnails, { once: true });
+    storyVideo.addEventListener("timeupdate", updateTimeline);
+
+    function revealStoryVideo() {
+      if (!landingComplete || storyVideo.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+      requestAnimationFrame(() => storyVideo.classList.add("is-visible"));
+      storyVideo.play().catch(() => {});
+    }
+    storyVideo.addEventListener("loadeddata", revealStoryVideo);
+
+    window.addEventListener("wheel", (event) => {
+      if (event.target.closest(".story-controls")) return;
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
+      if (delta === 0) return;
+
+      event.preventDefault();
+      if (!Number.isFinite(storyVideo.duration) || storyVideo.duration <= 0) return;
+
+      const deltaScale = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+          ? window.innerHeight
+          : 1;
+      const duration = storyVideo.duration;
+      if (scrubTarget === null) resumeAfterScroll = !storyVideo.paused;
+      const currentTime = scrubTarget ?? storyVideo.currentTime;
+      const nextTime = currentTime + delta * deltaScale * 0.01;
+      scrubTarget = ((nextTime % duration) + duration) % duration;
+
+      storyVideo.pause();
+      storyVideo.currentTime = scrubTarget;
+
+      window.clearTimeout(resumePlaybackTimer);
+      resumePlaybackTimer = window.setTimeout(() => {
+        scrubTarget = null;
+        if (resumeAfterScroll) storyVideo.play().catch(() => {});
+      }, 180);
+    }, { passive: false });
+  </script>
+  <script>
+    const landingCard = document.querySelector(".story-landing");
+    document.body.classList.add("landing-active");
+    requestAnimationFrame(() => landingCard.classList.add("is-visible"));
+    window.setTimeout(() => landingCard.classList.remove("is-visible"), 3900);
+    window.setTimeout(() => {
+      landingCard.remove();
+      document.body.classList.remove("landing-active");
+      landingComplete = true;
+      revealStoryVideo();
+      window.dispatchEvent(new Event("storylandingcomplete"));
+    }, 5000);
+  </script>
+</body>
+</html>
